@@ -1,0 +1,48 @@
+services:
+  # Redis Service
+  redis:
+    image: redis/redis-stack:latest
+    container_name: expense-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+
+  # MongoDB Service
+  mongo:
+    image: mongo:latest
+    container_name: expense-mongo
+    restart: unless-stopped
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+
+  # Node.js Application
+  app:
+    image: darshikasutariya/expense_split_backend:v1
+    container_name: expense-split-app
+    restart: unless-stopped
+    env_file: /server/.env.docker
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - mongo
+    networks:
+      - app-network
+
+volumes:
+  redis-data:
+  mongo-data:
+
+
+networks:
+  app-network:
+    driver: bridge
